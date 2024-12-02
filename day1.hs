@@ -1,11 +1,7 @@
-import Text.Regex.PCRE
 import Data.List (sort)
 
 toPair :: String -> (Int, Int)
-toPair s =
-    let (_, _, _, [a, b]) :: (String, String, String, [String])
-         = s =~ "^(\\d+)\\s+(\\d+)$" in
-    (read a, read b)
+toPair s = let [a, b] = read <$> words s in (a, b)
 
 sortPair :: Ord a => ([a], [a]) -> ([a], [a])
 sortPair (a, b) = (sort a, sort b)
