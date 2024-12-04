@@ -1,4 +1,4 @@
-import Data.List (uncons, isPrefixOf, transpose)
+import Data.List (uncons, transpose)
 import GHC.Read (readField)
 flipX :: [[a]] -> [[a]]
 flipX rs = reverse <$> rs
@@ -12,37 +12,33 @@ tailOrNothing = maybe [] snd . uncons
 cutColumn :: [[a]] -> [[a]]
 cutColumn rs = tailOrNothing <$> rs
 
-diag :: [[a]] -> [a]
-diag ((r:_):rs) = r : diag (cutColumn rs)
-diag _ = []
+linePatternChecks :: String -> String -> Bool
+linePatternChecks ('_':ps) (_:ss) = linePatternChecks ps ss
+linePatternChecks (p:ps) (s:ss) = p == s && linePatternChecks ps ss
+linePatternChecks (_:_) [] = False
+linePatternChecks [] _ = True
 
-diagsX rs@((_:_):_) = diag rs : diagsX (cutColumn rs)
-diagsX _ = []
-diagsY (r:rs) = diag (r:rs) : diagsY rs
-diagsY _ = []
 
-diags :: [[a]] -> [[a]]
-diags (r:rs) = diagsX (r:rs) ++ diagsY rs
-diags _ = []
+check :: [String] -> [String] -> Bool
+check (g:gs) (p:ps) = linePatternChecks p g && check gs ps
+check [] (_:_) = False
+check _ _ = True
 
-countXMAS :: [String] -> Int
-countXMAS ss = sum $ countXMASLine <$> ss
-    where countXMASLine s@(_:cs)
-            | isPrefixOf "XMAS" s = 1 + rest
-            | otherwise = rest
-            where rest = countXMASLine cs
-          countXMASLine _ = 0
+count :: [String] -> [String] -> Int
+count (g:gs) pattern = countX (g:gs) + count gs pattern
+  where countX ([]:_) = 0
+        countX grid
+          | check grid pattern = 1 + rest grid
+          | otherwise = rest grid
+          where rest grid = countX $ cutColumn grid
+count [] _ = 0
+
 
 main :: IO ()
 main = do
     input <- readFile "./input"
-    let a = lines input
-    let b = flipX a
-    let c = transpose a
-    let d = flipX c
-    let e = diags a
-    let f = diags b
-    let g = diags $ flipY a
-    let h = diags $ flipX $ flipY a
-    let sol1 = sum $ countXMAS <$> [a, b, c, d, e, f, g, h]
+    let l = lines input
+    let pattern = ["XMAS"]
+    let pattern_diag = ["X___", "_M__", "__A_", "___S"]
+    let sol1 = sum $ count l <$> [pattern, flipX pattern, transpose pattern, transpose $ flipX pattern, pattern_diag, flipX pattern_diag, flipY pattern_diag, flipX $ flipY pattern_diag]
     putStrLn $ "First task: " ++ show sol1
