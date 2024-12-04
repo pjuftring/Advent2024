@@ -1,5 +1,5 @@
 import Data.List (uncons, transpose)
-import GHC.Read (readField)
+
 flipX :: [[a]] -> [[a]]
 flipX rs = reverse <$> rs
 
@@ -18,7 +18,6 @@ linePatternChecks (p:ps) (s:ss) = p == s && linePatternChecks ps ss
 linePatternChecks (_:_) [] = False
 linePatternChecks [] _ = True
 
-
 check :: [String] -> [String] -> Bool
 check (g:gs) (p:ps) = linePatternChecks p g && check gs ps
 check [] (_:_) = False
@@ -33,12 +32,26 @@ count (g:gs) pattern = countX (g:gs) + count gs pattern
           where rest grid = countX $ cutColumn grid
 count [] _ = 0
 
-
 main :: IO ()
 main = do
-    input <- readFile "./input"
-    let l = lines input
-    let pattern = ["XMAS"]
-    let pattern_diag = ["X___", "_M__", "__A_", "___S"]
-    let sol1 = sum $ count l <$> [pattern, flipX pattern, transpose pattern, transpose $ flipX pattern, pattern_diag, flipX pattern_diag, flipY pattern_diag, flipX $ flipY pattern_diag]
-    putStrLn $ "First task: " ++ show sol1
+  input <- readFile "./input"
+  let l = lines input
+  let pattern = ["XMAS"]
+  let pattern_diag = ["X___", "_M__", "__A_", "___S"]
+  let sol1 = sum $ count l <$>
+        [pattern,
+        flipX pattern,
+        transpose pattern,
+        transpose $ flipX pattern,
+        pattern_diag,
+        flipX pattern_diag,
+        flipY pattern_diag,
+        flipX $ flipY pattern_diag]
+  putStrLn $ "First task: " ++ show sol1
+  let pattern2 = ["M_S", "_A_", "M_S"]
+  let sol2 = sum $ count l <$>
+        [pattern2,
+        flipX pattern2,
+        transpose pattern2,
+        transpose $ flipX pattern2]
+  putStrLn $ "Second task: " ++ show sol2
