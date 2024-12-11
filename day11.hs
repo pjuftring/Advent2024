@@ -39,11 +39,18 @@ countBlink cache c i =
       else
         countBlink cache (c - 1) (i * 2024)
 
+countBlinkList :: Cache -> Int -> [Int] -> (Cache, Int)
+countBlinkList cache _ [] = (cache, 0)
+countBlinkList cache c (i:is) =
+  let (cache', n) = countBlink cache c i in
+  let (cache'', m) = countBlinkList cache' c is in
+  (cache'', n + m)
+
 main :: IO ()
 main = do
   input <- readFile "./input"
   let nums = read <$> words input
-  let sol1 = sum $ snd . countBlink Empty 25 <$> nums
+  let (cache, sol1) = countBlinkList Empty 25 nums
   putStrLn $ "First task: " ++ show sol1
-  let sol2 = sum $ snd . countBlink Empty 75 <$> nums
+  let (_, sol2) = countBlinkList cache 75 nums
   putStrLn $ "Second task: " ++ show sol2
